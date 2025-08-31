@@ -6,7 +6,22 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/_Project/_Scenes/SCN_SplashScreen.unity
+    guid: bc08d7dbd249a674a9787c07de49ee41
+  - enabled: 1
+    path: Assets/_Project/_Scenes/SCN_MainMenu.unity
+    guid: 24046f1f46d149e46a0ad411dde4dbf0
+  - enabled: 1
+    path: Assets/_Project/_Scenes/SCN_MonsterSelection.unity
+    guid: 5f99412ac12885344bbf9363d27d1cd6
+  - enabled: 1
+    path: Assets/_Project/_Scenes/SCN_ArenaSelection.unity
+    guid: 72e6337b3556d3c4da6f34d56cceed78
+  - enabled: 1
+    path: Assets/_Project/_Scenes/SCN_LoadScreen.unity
+    guid: b4f0623dfedefb34da6315ffaa14f6f3
+  - enabled: 1
+    path: Assets/_Project/_Scenes/SCN_Game.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

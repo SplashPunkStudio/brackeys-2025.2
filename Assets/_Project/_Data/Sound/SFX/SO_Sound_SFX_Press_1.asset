@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7649e5e2a13ace04bb36cbb93b64afa1, type: 3}
+  m_Name: SO_Sound_SFX_Press_1
+  m_EditorClassIdentifier: Assembly-CSharp::SO_Sound
+  type: 2
+  group: {fileID: -714886685609852834, guid: 6a21c34cba053ba49acddf5d86b9006c, type: 2}
+  clip:
+  - {fileID: 8300000, guid: 45519816fe50f9c4ea00023e701b3f68, type: 3}
+  - {fileID: 8300000, guid: 3dcbaaf347eac7e4c8c106af6cba32dd, type: 3}
+  - {fileID: 8300000, guid: 7096b28bc5a63a0438dff94dc666d838, type: 3}
+  - {fileID: 8300000, guid: 8f8fb7218d5eca64b84adfbfef29b5c7, type: 3}
+  - {fileID: 8300000, guid: abc7b360b9024d94cae235752e8ce1fd, type: 3}
+  volume: 0.5
+  pitch: 1
+  loop: 0
+  spatialBlend: 0

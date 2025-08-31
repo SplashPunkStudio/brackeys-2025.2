@@ -1,8 +1,8 @@
 using UnityEngine;
-using TMPro; // Using TextMeshPro for UI Text elements
-using UnityEngine.UI; // Required for Button
-using System.Collections.Generic; // Required for List
-using System.Linq; // Required for LINQ operations (Min, OrderBy, etc.)
+using TMPro;
+using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,18 +12,16 @@ public class GameManager : MonoBehaviour
 
     // --- Editor-exposed Configurations (Serialized Private Fields) ---
     [Header("Game Settings")]
-    [SerializeField] private int _numberOfEnds = 8; // Total number of ends in the game
-    [SerializeField] private int _stonesPerTeamPerEnd = 4; // Number of stones each team throws per end
+    [SerializeField] private int _numberOfEnds = 8;
+    [SerializeField] private int _stonesPerTeamPerEnd = 4;
 
     [Header("Prefabs & Spawn")]
-    [SerializeField] private GameObject _redStonePrefab; // Prefab for Red Team stone
-    [SerializeField] private GameObject _blueStonePrefab; // Prefab for Blue Team stone
-    [SerializeField] private Transform _stoneSpawnPoint; // Point where stones will be instantiated
+    [SerializeField] private GameObject _redStonePrefab;
+    [SerializeField] private GameObject _blueStonePrefab;
+    [SerializeField] private Transform _stoneSpawnPoint;
 
     [Header("Scoring Zones")]
-    // The innermost collider, representing the "Button" or center for scoring distance
     [SerializeField] private CircleCollider2D _buttonCollider;
-    // The outermost collider, defining the "House" (stones outside this don't score)
     [SerializeField] private CircleCollider2D _houseCollider;
 
     [Header("UI Elements")]
@@ -36,19 +34,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button _restartGameButton;
 
     // --- Private Game Variables (m_ convention for non-serialized) ---
-    // Exposed via public properties for controlled external access
     private GameState m_currentGameState;
-    public GameState CurrentGameState { get { return m_currentGameState; } } // Public property for read access
+    public GameState CurrentGameState { get { return m_currentGameState; } }
 
     private GameObject m_currentStone;
-    public GameObject CurrentStone { get { return m_currentStone; } } // Public property for read access
+    public GameObject CurrentStone { get { return m_currentStone; } }
 
     private int m_currentEnd;
     private int m_redTeamScore;
     private int m_blueTeamScore;
     private TeamType m_currentTeam;
     private int m_stonesThrownThisEnd;
-    private List<StoneController> m_allStonesInPlay = new List<StoneController>(); // All stones on the ice
+    private List<StoneController> m_allStonesInPlay = new List<StoneController>();
 
     // --- Lifecycle Methods ---
     void Start()
@@ -58,64 +55,74 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // Only check stone movement if in StoneMoving state and a stone is in play
-        if (m_currentGameState == GameState.StoneMoving && m_currentStone != null)
+        // A VERIFICAÇÃO DO MOVIMENTO DAS PEDRAS FOI ALTERADA AQUI
+        if (m_currentGameState == GameState.StoneMoving)
         {
-            Rigidbody2D rb = m_currentStone.GetComponent<Rigidbody2D>();
-            // Use linearVelocity.magnitude and angularVelocity.magnitude
-            if (rb != null && rb.linearVelocity.magnitude < 0.1f && rb.angularVelocity < 0.1f) // Stone has stopped moving
+            bool anyStoneStillMoving = false;
+            // Itera por todas as pedras em jogo para verificar se alguma ainda está se movendo
+            foreach (StoneController stone in m_allStonesInPlay)
             {
-                // Explicitly stop the stone to prevent lingering movement
-                rb.linearVelocity = Vector2.zero;
-                rb.angularVelocity = 0f;
-
-                // Deactivate the StoneController of the just-stopped stone
-                if (m_currentStone.GetComponent<StoneController>() != null)
+                if (stone != null && stone.gameObject.activeInHierarchy) // Garante que a pedra existe e está ativa na cena
                 {
-                    m_currentStone.GetComponent<StoneController>().enabled = false;
+                    Rigidbody2D rb = stone.GetComponent<Rigidbody2D>();
+                    if (rb != null)
+                    {
+                        // Se a velocidade linear ou angular for maior que um pequeno valor (quase parado)
+                        if (rb.linearVelocity.magnitude >= 0.1f || rb.angularVelocity >= 0.1f)
+                        {
+                            anyStoneStillMoving = true;
+                            break; // Encontramos uma pedra se movendo, não precisamos verificar as outras
+                        }
+                        // Se a pedra está quase parada, force-a a parar completamente para evitar "tremores"
+                        else if (rb.linearVelocity.magnitude < 0.1f && rb.angularVelocity < 0.1f)
+                        {
+                            rb.linearVelocity = Vector2.zero;
+                            rb.angularVelocity = 0f;
+                        }
+                    }
                 }
+            }
 
-                m_currentGameState = GameState.Aiming; // Back to aiming for the next stone or end
-                CheckEndCondition(); // Determine if all stones are thrown for this end
+            // Se nenhuma pedra está mais se movendo, então a fase de movimento terminou
+            if (!anyStoneStillMoving)
+            {
+                m_currentGameState = GameState.Aiming; // Volta ao estado de mira para a próxima ação
+                CheckEndCondition(); // Agora sim, verifica a condição do End (próxima pedra ou pontuação)
             }
         }
     }
 
     // --- Game Flow Methods ---
 
-    // Initializes and starts a new game
     public void StartGame()
     {
         m_currentEnd = 0;
         m_redTeamScore = 0;
         m_blueTeamScore = 0;
         m_stonesThrownThisEnd = 0;
-        m_currentGameState = GameState.BeforeGame; // Initial state
+        m_currentGameState = GameState.BeforeGame;
 
-        // Reset UI buttons
         _nextEndButton.gameObject.SetActive(false);
         _restartGameButton.gameObject.SetActive(false);
         _messageText.text = "";
 
-        ClearAllStones(); // Clear any existing stones from previous game/editor
-        StartNewEnd(); // Begin the first end
+        ClearAllStones();
+        StartNewEnd();
     }
 
-    // Starts a new end (round) of curling
     private void StartNewEnd()
     {
         m_currentEnd++;
         m_stonesThrownThisEnd = 0;
-        m_currentTeam = TeamType.Red; // Red team always starts each end in this prototype
+        m_currentTeam = TeamType.Red;
 
-        ClearAllStones(); // Remove all stones from the previous end
+        ClearAllStones();
         
         m_currentGameState = GameState.Aiming;
-        UpdateUI(); // Update UI for the new end
-        SpawnStone(); // Spawn the first stone of the new end
+        UpdateUI();
+        SpawnStone();
     }
 
-    // Clears all stones from the ice
     private void ClearAllStones()
     {
         foreach (var stone in m_allStonesInPlay)
@@ -129,50 +136,46 @@ public class GameManager : MonoBehaviour
         m_currentStone = null;
     }
 
-    // Spawns a stone for the current team
     private void SpawnStone()
     {
         GameObject stoneToSpawn = (m_currentTeam == TeamType.Red) ? _redStonePrefab : _blueStonePrefab;
         m_currentStone = Instantiate(stoneToSpawn, _stoneSpawnPoint.position, Quaternion.identity);
+        m_currentStone.name = $"{m_currentTeam}_{m_allStonesInPlay.Count / 2 + m_allStonesInPlay.Count % 2}";
 
         StoneController stoneController = m_currentStone.GetComponent<StoneController>();
         if (stoneController != null)
         {
-            stoneController.gameManager = this; // Pass reference to this GameManager
-            stoneController.teamType = m_currentTeam; // Assign team type to the stone
-            stoneController.enabled = true; // IMPORTANT: Enable this stone's controller for input
-            m_allStonesInPlay.Add(stoneController); // Add to the list of stones in play
+            stoneController.gameManager = this;
+            stoneController.teamType = m_currentTeam;
+            stoneController.enabled = true; // Habilita o StoneController da pedra para input
+            m_allStonesInPlay.Add(stoneController);
         }
     }
 
-    // Called by the StoneController when a stone is launched
     public void OnStoneLaunched()
     {
         m_stonesThrownThisEnd++;
-        m_currentGameState = GameState.StoneMoving;
+        m_currentGameState = GameState.StoneMoving; // Estado de movimento geral
         Debug.Log("Stone launched. Current state: " + m_currentGameState);
-        UpdateUI(); // Update UI to show stone is moving
+        UpdateUI();
     }
 
-    // Checks if all stones for the current end have been thrown
     private void CheckEndCondition()
     {
         if (m_stonesThrownThisEnd < (_stonesPerTeamPerEnd * 2))
         {
-            SwitchTurn(); // Switch to the other team for the next stone
-            SpawnStone(); // Spawn the next stone
-            m_currentGameState = GameState.Aiming; // Ensure state is aiming for the newly spawned stone
-            UpdateUI(); // Update UI for the new turn
+            SwitchTurn();
+            SpawnStone();
+            // m_currentGameState já será Aiming pela lógica de Update() quando todas as pedras pararem
+            UpdateUI();
         }
         else
         {
-            // All stones thrown for this end, time to score
             m_currentGameState = GameState.EndScoring;
             ScoreCurrentEnd();
         }
     }
 
-    // Switches the turn between Red and Blue teams
     private void SwitchTurn()
     {
         m_currentTeam = (m_currentTeam == TeamType.Red) ? TeamType.Blue : TeamType.Red;
@@ -180,15 +183,19 @@ public class GameManager : MonoBehaviour
 
     // --- Scoring Logic ---
 
-    // Calculates and applies score for the current end
     private void ScoreCurrentEnd()
     {
         _messageText.text = "End Scored!";
-        _nextEndButton.gameObject.SetActive(true); // Show button to proceed to next end
+        _nextEndButton.gameObject.SetActive(true);
 
-        // Get all stones that are currently "in the house"
         List<StoneController> stonesInHouse = m_allStonesInPlay
-            .Where(s => s != null && Vector2.Distance(s.transform.position, _buttonCollider.transform.position) <= _houseCollider.radius)
+            .Where(s => s != null && s.GetComponent<CircleCollider2D>() != null)
+            .Where(s => {
+                float distanceToButtonCenter = Vector2.Distance(s.transform.position, _buttonCollider.transform.position);
+                float stoneRadius = s.GetComponent<CircleCollider2D>().radius * s.transform.localScale.x;
+                float effectiveHouseRadius = _houseCollider.radius * _houseCollider.transform.localScale.x;
+                return distanceToButtonCenter <= effectiveHouseRadius + stoneRadius;
+            })
             .ToList();
 
         if (stonesInHouse.Count == 0)
@@ -199,37 +206,38 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Order stones in house by their distance to the button (closest first)
         List<StoneController> sortedStones = stonesInHouse
             .OrderBy(s => Vector2.Distance(s.transform.position, _buttonCollider.transform.position))
             .ToList();
 
-        // Determine which team has the closest stone in the house
         StoneController closestStone = sortedStones.FirstOrDefault();
-        if (closestStone == null) return; // Should not happen if stonesInHouse > 0
+        if (closestStone == null)
+        {
+             Debug.LogWarning("No closest stone found despite stones being in house. This should not happen.");
+             m_currentGameState = GameState.BetweenEnds;
+             UpdateUI();
+             return;
+        }
 
         TeamType scoringTeam = closestStone.teamType;
         float closestOpponentDistance = float.MaxValue;
 
-        // Find the closest stone of the OPPONENT team
         foreach (var stone in sortedStones)
         {
             if (stone.teamType != scoringTeam)
             {
                 closestOpponentDistance = Vector2.Distance(stone.transform.position, _buttonCollider.transform.position);
-                break; // Found the opponent's closest stone
+                break;
             }
         }
 
         int endPoints = 0;
-        if (closestOpponentDistance == float.MaxValue) // No opponent stones in the house
+        if (closestOpponentDistance == float.MaxValue)
         {
-            // If there are no opponent stones in the house, the scoring team scores for ALL their stones in the house
             endPoints = stonesInHouse.Count(s => s.teamType == scoringTeam);
         }
         else
         {
-            // Count how many of the scoring team's stones are closer to the button than the opponent's closest stone
             endPoints = stonesInHouse.Count(s => s.teamType == scoringTeam && Vector2.Distance(s.transform.position, _buttonCollider.transform.position) < closestOpponentDistance);
         }
 
@@ -289,12 +297,11 @@ public class GameManager : MonoBehaviour
     // Public method to restart the game (called by UI button)
     public void RestartGame()
     {
-        StartGame(); // Simply restarts the entire game flow
+        StartGame();
     }
 
     // --- UI Update ---
 
-    // Centralized method to update all UI elements
     private void UpdateUI()
     {
         _redTeamScoreText.text = "Red: " + m_redTeamScore;
@@ -316,7 +323,7 @@ public class GameManager : MonoBehaviour
             case GameState.GameOver:
                 _currentTeamText.text = "Game Over!";
                 break;
-            case GameState.BeforeGame: // Should only happen briefly at start
+            case GameState.BeforeGame:
                 _currentTeamText.text = "Starting Game...";
                 break;
         }
