@@ -16,7 +16,7 @@ MonoBehaviour:
   group: {fileID: -714886685609852834, guid: 6a21c34cba053ba49acddf5d86b9006c, type: 2}
   clip:
   - {fileID: 8300000, guid: 4b46adb1094352344b1b6d7be29c1c46, type: 3}
-  volume: 0.5
+  volume: 0.15
   pitch: 1
   loop: 1
   spatialBlend: 0

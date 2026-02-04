@@ -11,7 +11,9 @@ public class UI_MonsterSelection : MonoBehaviour
     [SerializeField] private Sprite _spriteParty2;
 
     [SerializeField] private Image _imgP1;
+    [SerializeField] private Animator _animP1;
     [SerializeField] private Image _imgP2;
+    [SerializeField] private Animator _animP2;
 
     [SerializeField] private Button _btnBack;
     [SerializeField] private Button _btnSwitch;
@@ -41,6 +43,9 @@ public class UI_MonsterSelection : MonoBehaviour
 
         _imgP1.sprite = m_p1SpriteParty1 ? _spriteParty1 : _spriteParty2;
         _imgP2.sprite = m_p1SpriteParty1 ? _spriteParty2 : _spriteParty1;
+
+        _animP1.Play("Bounce");
+        _animP2.Play("Bounce");
 
         Manager_Events.Sound.SFX.OnSfxPress.Notify();
     }

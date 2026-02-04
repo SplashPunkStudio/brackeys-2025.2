@@ -43,9 +43,14 @@ public class SFX_Sound : MonoBehaviour
         m_soSound = null;
     }
 
+    public void SetVolume(float volume)
+    {
+        _audioSource.volume = volume;
+    }
+
     private IEnumerator WaitSound()
     {
-        while(_audioSource.isPlaying)
+        while (_audioSource.isPlaying)
             yield return null;
 
         Manager_Events.Sound.OnReleaseSound.Notify(this);

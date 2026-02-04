@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7649e5e2a13ace04bb36cbb93b64afa1, type: 3}
+  m_Name: SO_Sound_Music_Game
+  m_EditorClassIdentifier: Assembly-CSharp::SO_Sound
+  type: 1
+  group: {fileID: -594704638950166268, guid: 6a21c34cba053ba49acddf5d86b9006c, type: 2}
+  clip:
+  - {fileID: 8300000, guid: 82eeb1fe242ad694280f2b49b72609de, type: 3}
+  volume: 1
+  pitch: 1
+  loop: 1
+  spatialBlend: 0

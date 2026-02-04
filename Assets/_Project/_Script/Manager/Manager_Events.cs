@@ -39,6 +39,7 @@ public static class Manager_Events
     {
         public static Event<SO_Sound> OnPlay;
         public static Event<SO_Sound> OnStop;
+        public static Event<SO_Sound, float> OnVolume;
         public static Event<SFX_Sound> OnReleaseSound;
         public static Event<SO_SoundType> OnReleaseByType;
 

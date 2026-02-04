@@ -23,4 +23,9 @@ public class SO_Sound : ScriptableObject
         Manager_Events.Sound.OnStop.Notify(this);
     }
 
+    public void SetVolume(float volume)
+    {
+        Manager_Events.Sound.OnVolume.Notify(this, volume);
+    }
+
 }

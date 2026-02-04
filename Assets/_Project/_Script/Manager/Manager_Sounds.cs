@@ -100,10 +100,20 @@ public class Manager_Sounds : Singleton<Manager_Sounds>
         OnPlay(_pressSfx);
     }
 
+    private void OnVolume(SO_Sound so_sound, float volume)
+    {
+        if (!m_dictSounds.ContainsKey(so_sound))
+            return;
+
+        m_dictSounds[so_sound].SetVolume(volume);
+    }
+
+
     void OnEnable()
     {
         Manager_Events.Sound.OnPlay += OnPlay;
         Manager_Events.Sound.OnStop += OnStop;
+        Manager_Events.Sound.OnVolume += OnVolume;
         Manager_Events.Sound.OnReleaseSound += OnReleaseSfx;
         Manager_Events.Sound.OnReleaseByType += OnReleaseByType;
 
@@ -114,8 +124,11 @@ public class Manager_Sounds : Singleton<Manager_Sounds>
     {
         Manager_Events.Sound.OnPlay -= OnPlay;
         Manager_Events.Sound.OnStop -= OnStop;
+        Manager_Events.Sound.OnVolume -= OnVolume;
         Manager_Events.Sound.OnReleaseSound -= OnReleaseSfx;
         Manager_Events.Sound.OnReleaseByType -= OnReleaseByType;
+
+        Manager_Events.Sound.SFX.OnSfxPress -= OnSfxPress;
     }
 
 
